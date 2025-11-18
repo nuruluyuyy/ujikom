@@ -13,14 +13,13 @@ class Gallery extends Model
 
     protected $fillable = [
         'title',
-        'description',
         'image',
         'category_id',
         'user_id',
-        'is_active'
+        'is_active',
     ];
 
-    protected $appends = ['image_url'];
+    protected $appends = ['image_url', 'is_liked', 'likes_count'];
 
     public function getImageUrlAttribute()
     {
@@ -42,22 +41,44 @@ class Gallery extends Model
         return $this->hasMany(Photo::class);
     }
 
+    /**
+     * Relasi ke tabel likes (per user).
+     */
     public function likes(): HasMany
     {
         return $this->hasMany(Like::class);
     }
 
-    public function getIsLikedAttribute()
+    /**
+     * Attribute: apakah gallery ini sudah di-like oleh user yang sedang login.
+     */
+    public function getIsLikedAttribute(): bool
     {
         if (!auth()->check()) {
             return false;
         }
-        
-        return $this->likes()->where('user_id', auth()->id())->exists();
+
+        return $this->likes()
+            ->where('user_id', auth()->id())
+            ->exists();
     }
 
-    public function getLikesCountAttribute()
+    /**
+     * Attribute: jumlah like.
+     * Jika sudah ada kolom likes_count (dari withCount), pakai itu.
+     */
+    public function getLikesCountAttribute(): int
     {
-        return $this->likes_count ?? $this->likes()->count();
+        if (array_key_exists('likes_count', $this->attributes)) {
+            return (int) $this->attributes['likes_count'];
+        }
+
+        return $this->likes()->count();
     }
+
+    public function stats()
+    {
+        return $this->hasOne(\App\Models\GalleryStat::class);
+    }
+
 }

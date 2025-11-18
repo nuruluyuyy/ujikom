@@ -2,25 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Like extends Model
+class GalleryStat extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'user_id',
         'gallery_id',
+        'likes_count',
+        'shares_count',
+        'downloads_count',
+        'last_liked_at',
+        'last_shared_at',
+        'last_downloaded_at',
     ];
 
     public function gallery()
     {
         return $this->belongsTo(Gallery::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
     }
 }
